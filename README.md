@@ -1,206 +1,87 @@
 # 🛡️ Explainable AI–Based Threat Modeling for Trustworthy Cyber–Physical Systems under Intelligent Adversaries
 
-An end-to-end, privacy-preserving, and explainable Machine Learning security framework designed for industrial Cyber-Physical Systems (CPS). This project implements a federated intrusion detection pipeline using the real-world **SWaT (Secure Water Treatment) dataset** to identify cyber-physical attacks on critical water infrastructure while guaranteeing client privacy, explainability (XAI), and adversarial robustness.
+An end-to-end, privacy-preserving, and explainable Machine Learning threat detection framework designed for industrial Cyber-Physical Systems (CPS). This project simulates a decentralized threat modeling and anomaly detection pipeline using the real-world **SWaT (Secure Water Treatment) dataset** to identify cyber-physical attacks on critical water infrastructure while evaluating client privacy bounds, explainability (XAI), and model robustness.
 
 > [!IMPORTANT]
-> **Resource Notice**: Due to the heavy resource requirements of training Federated Learning models with Differential Privacy on 1,000,000+ rows of sensor data, this repository is optimized for **lightweight verification and local evaluation**. It includes pre-trained model weights, configuration templates, and cached experiment results. **Local retraining is disabled by default to prevent hardware performance degradation.**
+> **Resource & Execution Notice**: Training federated deep learning models on nearly 1,000,000 rows of SWaT sensor telemetry requires significant GPU resources. This repository is structured for **lightweight local validation and verification**. It includes pre-trained model weights, configuration templates, and cached evaluation metrics. **Local retraining is disabled by default to prevent hardware performance degradation.**
 
 ---
 
 ## 📖 Project Overview
 
 ### The Problem We Solve
-Cyber-Physical Systems (CPS)—such as water treatment plants, smart grids, and oil pipelines—face highly sophisticated cyber threats. Unlike IT networks, attacks on CPS target physical processes (e.g., closing valves, overriding pumps, or altering chemical doses). Classifying these anomalies is difficult due to:
-1. **Data Silos & Privacy**: Infrastructure operators cannot centralize raw sensor logs due to intellectual property, security compliance, and data privacy regulations.
-2. **Explainability Deficit**: Operators will not act on a "black-box" alarm. They need to know *why* the AI flagged an anomaly and *which* specific sensors were compromised.
-3. **Adversarial Vulnerability**: Smart adversaries can inject tiny, mathematically optimized perturbations (noise) into sensor streams to trick the neural network into ignoring a catastrophic attack.
+Industrial Control Systems (ICS) and SCADA networks managing critical infrastructure face physical process manipulation attacks (e.g., overriding water pumps, altering tank valves). Building robust, trustable anomaly detectors for these environments is difficult due to:
+1. **Data Silos & Privacy**: Local plants cannot centralize raw sensor telemetry due to strict industrial security regulations and confidentiality agreements.
+2. **Explainability Deficit**: Control room operators cannot trust a black-box model. Alarms must be explained by highlighting the exact sensors driving the anomaly.
+3. **Adversarial Vulnerability**: Adversaries can craft minor, mathematically optimized perturbations (noise) to inject into sensor feeds, masking physical damage from the AI system.
 
-### Why It Matters
-A successful cyber-physical attack can cause physical damage, environmental hazards, or loss of life. This framework demonstrates how to build a **trustworthy, decentralized anomaly detector** that remains robust under adversarial noise, explains its decisions, and mathematical guarantees that raw data cannot be reverse-engineered from shared model weights.
+### The Solution
+This project implements a local multi-client thread-based simulation of **Federated Learning** integrated with **Differential Privacy (DP-SGD)**. Local plants keep their telemetry private and only share model weight updates, which are aggregated via the **FedAvg** strategy. The global model is analyzed through a **SHAP Explainability** module with mathematical **Fidelity Verification** and tested against evasion attacks in an **Adversarial Sandbox**.
 
 ---
 
 ## 🛠️ Key Features
 
-* **🏋️ Federated Learning Strategy**: Simulates a decentralized network of 3 independent water treatment plants. Each plant trains an RNN model locally on its own sensor streams, sharing only model weights with a central server via the **FedAvg** strategy using `Flower`.
-* **🔒 Differential Privacy (DP)**: Integrates `Opacus` on local client plants to clip gradients and inject mathematical noise during training ($\epsilon$-differential privacy tracking). This mathematically guarantees that gradients cannot be analyzed to reconstruct private sensor readings.
-* **🔍 Explainable AI (XAI) & Fidelity Verification**: Uses Kernel SHAP to compute real-time sensor contribution scores. It integrates a custom **Fidelity Verifier** that masks top-contributing features to mathematically verify if the explanations match the true model logic.
-* **⚔️ Adversarial Robustness Sandbox**: Simulates intelligent attackers using the **Adversarial Robustness Toolbox (ART)**. The sandbox evaluates model resilience against Fast Gradient Sign Method (FGSM) and Projected Gradient Descent (PGD) attacks.
-* **☁️ Enterprise Database Integration**: Connects to **MongoDB Atlas Cloud** to permanently log hyperparameters, evaluation metrics, adversarial success rates, and SHAP explanation arrays for auditing.
+* **🏋️ Federated Simulation Loop**: Simulates decentralized training across 3 independent water treatment plants locally using a custom thread-level parameter aggregation loop (`_weighted_fedavg`).
+* **🔒 Differential Privacy (DP)**: Integrates `Opacus` on local client model copies to bound sample influence (gradient clipping) and inject Gaussian noise, providing mathematically provable privacy guarantees against weight-inversion attacks.
+* **🔍 Explainable AI (SHAP)**: Uses Kernel SHAP to compute contribution scores for each sensor in the SCADA pipeline, mapping which sensors triggered an alarm.
+* **🧪 Fidelity Verification**: A custom verifier that masks high-importance sensors to measure confidence drops, mathematically proving if SHAP explanations align with actual model logic.
+* **⚔️ Adversarial Sandbox**: Evaluates global model resilience against Fast Gradient Sign Method (FGSM) and Projected Gradient Descent (PGD) evasion attacks generated using the **Adversarial Robustness Toolbox (ART)**.
+* **💻 FastAPI & Streamlit Stack**: Serves predictions, explanations, and robustness tests via a local API server and a visual monitoring dashboard.
+* **☁️ Database Logging**: Connects to **MongoDB Atlas Cloud** to archive hyperparameters, metrics, and XAI evaluations for compliance auditing.
 
 ---
 
-## 🔐 Cryptographic Architecture & Secure Communication (System Design Specification)
+## 📊 System Architecture & Visual Documentation
 
-> [!NOTE]
-> **Codebase Scope vs. System Design**: The cryptographic protocols detailed below represent the **conceptual threat-modeling and security design specification** for securing PLC edge-node telemetry in a production deployment. The **active codebase** in this repository implements the backend FastAPI inference services, the frontend monitoring Streamlit dashboard, and the core Machine Learning pipelines (Federated Learning client simulation, Differential Privacy noise injection, SHAP explanation verification, and Adversarial Sandbox robustness testing).
-
-In a real-world industrial control environment, federated training nodes (e.g., edge gateways or PLCs) must securely register, authenticate, and communicate with the central Federated SCADA server. Below is the specification of our secure communication model, combining public-key cryptography, zero-knowledge proofs, and authenticated symmetric encryption.
-
-```
-                  ┌──────────────────────────────────────────────┐
-                  │           Cryptographic Protocols            │
-                  ├──────────────────────┬───────────────────────┤
-                  │     Registration     │       RSA Signatures  │
-                  ├──────────────────────┼───────────────────────┤
-                  │    Authentication    │   Schnorr ZKP (ECC)   │
-                  ├──────────────────────┼───────────────────────┤
-                  │     Key Exchange     │         ECDH          │
-                  ├──────────────────────┼───────────────────────┤
-                  │    Confidentiality   │      AES-GCM-256      │
-                  ├──────────────────────┼───────────────────────┤
-                  │      Integrity       │      AES-GCM Tag      │
-                  └──────────────────────┴───────────────────────┘
-```
-
-### 1. RSA Digital Signatures (Registration)
-* **Usage**: Verifying device identity during initial setup.
-* **Mechanism**: The SCADA Master Server maintains a Root Certificate Authority (CA) key pair. When a new edge node (e.g., a PLC) is deployed, its public key is signed by the Master Server's RSA private key. The signed certificate is stored on the PLC, establishing a verifiable anchor of trust.
-
-### 2. Elliptic Curve Cryptography (ECC) & Schnorr ZKP (Authentication)
-* **Usage**: Proving node identity on connection startup without exposing private credentials.
-* **Schnorr Zero-Knowledge Proof (ZKP)**:
-  1. **Parameters**: An elliptic curve base point $G$ of order $n$. The PLC has a private key $x$ and public key $Y = x \cdot G$.
-  2. **Commitment**: The PLC chooses a random integer $r \in [1, n-1]$ and sends a commitment point $R = r \cdot G$ to the server.
-  3. **Challenge**: The server responds with a random challenge hash $c$.
-  4. **Response**: The PLC calculates $s = r + c \cdot x \pmod n$ and sends $s$ to the server.
-  5. **Verification**: The server checks that $s \cdot G = R + c \cdot Y$. If the equation holds, the PLC is authenticated without ever transmitting its private key $x$ over the network.
-* **Why it matters**: Prevents **eavesdropping** and **impersonation attacks**, even if the network is completely compromised.
-
-### 3. ECDH Session Key Establishment
-* **Usage**: Deriving a shared symmetric encryption key.
-* **Mechanism**: Once authenticated, the PLC and SCADA server execute an Elliptic Curve Diffie-Hellman (ECDH) exchange. The PLC generates a transient key pair $(d_A, Q_A = d_A \cdot G)$ and the server generates $(d_B, Q_B = d_B \cdot G)$. They exchange public keys $Q_A$ and $Q_B$.
-* **Shared Secret**: Both derive the shared secret $S = d_A \cdot Q_B = d_B \cdot Q_A$. A Key Derivation Function (KDF) processes $S$ to output a 256-bit symmetric session key.
-
-### 4. AES-GCM Encryption (Message Confidentiality & Integrity)
-* **Usage**: Securing raw sensor telemetry packets.
-* **Mechanism**: Telemetry is encrypted using **AES-256-GCM** (Galois/Counter Mode). This provides Authenticated Encryption with Associated Data (AEAD). 
-* **Payload**: Each packet contains:
-  $$\text{Ciphertext} \parallel \text{Authentication Tag} \parallel \text{Initialization Vector (IV)} \parallel \text{Nonce}$$
-* **Integrity check**: The server decrypts the payload and validates the 128-bit authentication tag. If any sensor values are tampered with in transit, tag validation fails, and the packet is rejected.
-
-### 5. Replay Attack Prevention
-* **Mechanism**: The PLC appends a monotonically increasing nonce and a high-precision UTC timestamp to the packet metadata before generating the AES-GCM tag. The server validates that:
-  - The timestamp is within a strict window (e.g., < 2 seconds drift).
-  - The nonce is strictly greater than the last received nonce.
-  If an attacker intercepts a packet and tries to replay it, the server immediately flags and drops it.
-
----
-
-## 📊 Visual Documentation
-
-### System Architecture
-This diagram outlines the Federated Learning training loops, showing how local differential privacy noise is applied, gradients are aggregated, and the model is deployed to the inference API.
+### System Architecture Workflow
+This diagram represents the actual implemented codebase execution flow: loading and partitioning the SWaT data, simulating local client training with Opacus differential privacy, aggregating weights, and serving the model through the API and diagnostic dashboard.
 
 ```mermaid
 graph TB
-    subgraph Client Node A (Plant 1)
-        A_Sens[SWaT Sensors] --> A_Prep[Local Preprocessing]
-        A_Prep --> A_Model[Local RNN Model]
-        A_Model --> A_DP[Opacus: Gradient Clip + DP Noise]
+    %% Nodes
+    Sensors["SWaT Sensor Telemetry (or Synthetic)"] --> Prep["Data Preprocessing (MinMax Scaling)"]
+    Prep --> Part["Data Partitioning (3 Local Client Subsets)"]
+
+    subgraph Clients ["Local Federated Client Simulation (Threads)"]
+        subgraph Client_1 ["Client Plant 1"]
+            C1_Model["Local RNN Model"] --> C1_DP["Opacus DP-SGD (Gradient Clip + Noise)"]
+        end
+        subgraph Client_2 ["Client Plant 2"]
+            C2_Model["Local RNN Model"] --> C2_DP["Opacus DP-SGD (Gradient Clip + Noise)"]
+        end
+        subgraph Client_3 ["Client Plant 3"]
+            C3_Model["Local RNN Model"] --> C3_DP["Opacus DP-SGD (Gradient Clip + Noise)"]
+        end
     end
 
-    subgraph Client Node B (Plant 2)
-        B_Sens[SWaT Sensors] --> B_Prep[Local Preprocessing]
-        B_Prep --> B_Model[Local RNN Model]
-        B_Model --> B_DP[Opacus: Gradient Clip + DP Noise]
-    end
+    Part --> C1_Model
+    Part --> C2_Model
+    Part --> C3_Model
 
-    subgraph Client Node C (Plant 3)
-        C_Sens[SWaT Sensors] --> C_Prep[Local Preprocessing]
-        C_Prep --> C_Model[Local RNN Model]
-        C_Model --> C_DP[Opacus: Gradient Clip + DP Noise]
-    end
+    C1_DP -- "Cleaned Local Weights" --> Agg["FedAvg Aggregator (Custom Loop)"]
+    C2_DP -- "Cleaned Local Weights" --> Agg
+    C3_DP -- "Cleaned Local Weights" --> Agg
 
-    A_DP -- Encrypted Weights --> Server[Flower Federated Server]
-    B_DP -- Encrypted Weights --> Server
-    C_DP -- Encrypted Weights --> Server
+    Agg -- "Global Weight Sync" --> C1_Model
+    Agg -- "Global Weight Sync" --> C2_Model
+    Agg -- "Global Weight Sync" --> C3_Model
 
-    Server -- FedAvg Aggregation --o Global[Global Pre-trained Weights]
+    Agg --> Global["Final Global Pre-trained Model (pt)"]
+    Global --> API["FastAPI Inference Server (api/main.py)"]
+    API --> UI["Streamlit Dashboard (dashboard/app.py)"]
 
-    Global --> API[FastAPI Inference backend]
-    API --> UI[Streamlit Dashboard Interface]
-    
-    UI --> SHAP[SHAP Explainer & Fidelity Verifier]
-    UI --> ART[Adversarial Robustness Sandbox]
-    API --> DB[(MongoDB Atlas Cloud DB)]
-```
-
-### Device Registration Workflow
-Demonstrates the initial handshake where the edge device registers its public key identity.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Admin as System Administrator
-    participant PLC as PLC Edge Node
-    participant Server as SCADA Master Server
-    participant DB as MongoDB Atlas
-
-    Admin->>PLC: Generate ECC Key Pair (Private x, Public Y)
-    PLC->>Server: Registration request (Device ID, Public Key Y)
-    Note over Server: Server validates registration token
-    Server->>Server: Sign Public Key Y with Server RSA CA Key
-    Server->>DB: Save Registered Node ID & Public Key Y
-    Server->>PLC: Registration Acknowledge (Signed Certificate)
-```
-
-### Device Authentication (Schnorr ZKP) Workflow
-Illustrates the challenge-response protocol proving ownership of the private key without transmitting it.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant PLC as PLC Edge Node (Private key x, Public Y)
-    participant Server as SCADA Master Server (Has Public Y)
-
-    PLC->>PLC: Select random r in [1, n-1]
-    PLC->>PLC: Compute commitment R = r * G
-    PLC->>Server: Send Authentication Intent (Device ID, Commitment R)
-    Server->>Server: Generate random challenge c
-    Server->>PLC: Send challenge c
-    PLC->>PLC: Compute response s = r + c * x (mod n)
-    PLC->>Server: Send response s
-    Server->>Server: Verify s * G == R + c * Y
-    alt Verification Successful
-        Server->>PLC: Authentication Confirmed (Session Token)
-    else Verification Failed
-        Server->>PLC: Reject Connection
+    subgraph Diagnostic ["Evaluation & Diagnostics"]
+        UI --> SHAP["SHAP Explainer (xai/shap_explainer.py)"]
+        SHAP --> Fid["Fidelity Verifier (fidelity/verifier.py)"]
+        UI --> ART["Adversarial Sandbox (adversarial/attacks.py)"]
     end
 ```
 
-### Secure Communication & Session Key Exchange
-Shows the dynamic session establishment (ECDH) and the telemetry transmission encrypted with AES-GCM.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant PLC as PLC Edge Node (Private x, Public Y)
-    participant Server as SCADA Master Server (Has Public Y)
-
-    Note over PLC,Server: Step 1: ECDH Key Exchange
-    PLC->>PLC: Generate transient ECDH pair (d_A, Q_A)
-    Server->>Server: Generate transient ECDH pair (d_B, Q_B)
-    PLC->>Server: Send transient public key Q_A
-    Server->>PLC: Send transient public key Q_B
-    PLC->>PLC: Compute Shared Secret S = d_A * Q_B
-    Server->>Server: Compute Shared Secret S = d_B * Q_A
-    PLC->>PLC: Derive Session Key K = KDF(S)
-    Server->>Server: Derive Session Key K = KDF(S)
-
-    Note over PLC,Server: Step 2: Telemetry Data Transmission
-    PLC->>PLC: Gather sensor stream (LIT101, FIT101)
-    PLC->>PLC: Pack payload with timestamp & monotonic Nonce
-    PLC->>PLC: Encrypt via AES-256-GCM using Session Key K
-    PLC->>Server: Send Ciphertext, Authentication Tag, IV, and Nonce
-    Server->>Server: Validate Timestamp & check Nonce is progressive
-    Server->>Server: Decrypt and verify Integrity Tag using Session Key K
-    alt Tag is Valid
-        Server->>Server: Feed sensor data to Local Anomaly Detector RNN
-    else Tag is Invalid
-        Server->>Server: Log Integrity Violation Alert & Drop Packet
-    end
-```
+### Explanation of Visual Workflows
+1. **Telemetry Preprocessing**: Data is min-max normalized and segment-windowed before partitioning. Splitting prior to windowing prevents data leakage across training phases.
+2. **Federated Aggregation**: Local plants train their client models for a specified number of epochs. Opacus clips gradients and injects noise. The weights are cleaned of the Opacus `_module.` prefix and sent to the custom loop aggregator, which runs a weighted FedAvg algorithm.
+3. **API & Monitoring**: The consolidated global model weights are saved to disk and loaded by the FastAPI service. The Streamlit dashboard interfaces with API endpoints to perform real-time diagnostic checks (predicting attacks, generating explanations, and running evasion attacks).
 
 ---
 
@@ -250,9 +131,9 @@ sequenceDiagram
 │       └── experiment_results.json
 │
 ├── federated/              # Federated learning pipeline
-│   ├── client.py           # Local client model setup
-│   ├── server.py           # Flower Server simulation runner
-│   └── strategy.py         # Custom federated weight aggregator
+│   ├── client.py           # Local client model setup (Flower NumPyClient)
+│   ├── server.py           # Simulation runner and parameter aggregation
+│   └── strategy.py         # Federated strategy structures
 │
 ├── fidelity/               # XAI fidelity evaluation
 │   └── verifier.py         # Feature masking verification routines
@@ -363,7 +244,7 @@ The model was trained on a T4 GPU using Google Colab. Below are the results logg
 
 1. **Active Defense**: Integrate Adversarial Training by injecting PGD-perturbed samples into the training dataset during local federated rounds.
 2. **Asymmetric Federated Learning**: Allow clients with heterogeneous compute capacities to run different model parameters (e.g., pruning local clients with low GPU RAM).
-3. **Advanced ZKP**: Replace basic Schnorr ZKP with non-interactive zero-knowledge proofs (zk-SNARKs) to authorize node credentials without multi-round handshakes.
+3. **Automated Explanations**: Optimize prediction pathways by replacing Kernel SHAP with TreeSHAP or DeepSHAP to reduce CPU bottlenecks.
 
 ---
 
