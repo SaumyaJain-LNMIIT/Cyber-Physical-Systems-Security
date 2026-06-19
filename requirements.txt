@@ -1,0 +1,47 @@
+# ============================================================
+# CPS Security Project — Python Dependencies
+# ============================================================
+
+# --- Core ML ---
+torch>=2.0.0
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+
+# --- Federated Learning ---
+flwr[simulation]>=1.5.0
+
+# --- Differential Privacy ---
+opacus>=1.4.0
+
+# --- Adversarial Robustness ---
+adversarial-robustness-toolbox>=1.15.0
+
+# --- Explainable AI ---
+shap>=0.42.0
+
+# --- API ---
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+
+# --- Database ---
+pymongo>=4.5.0
+motor>=3.3.0
+
+# --- Dashboard ---
+streamlit>=1.28.0
+plotly>=5.17.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# --- Config ---
+pyyaml>=6.0
+
+# --- Dataset ---
+kagglehub>=0.2.0
+
+# --- Utilities ---
+tqdm>=4.65.0
+loguru>=0.7.0
+python-dotenv>=1.0.0

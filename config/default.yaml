@@ -1,0 +1,103 @@
+# ============================================================
+# CPS Security Project — Default Configuration
+# ============================================================
+# This file contains all hyperparameters and settings.
+# Override with local.yaml (CPU) or colab.yaml (GPU).
+# ============================================================
+
+# --- Data Settings ---
+data:
+  # Source: "kaggle" (download from Kaggle), "csv" (local files), "synthetic" (generate fake data)
+  source: "kaggle"
+  kaggle_dataset: "vishala28/swat-dataset-secure-water-treatment-system"
+  csv_normal_path: "data/raw/Normal_v0.csv"
+  csv_attack_path: "data/raw/Attack_v0.csv"
+  # Synthetic data settings
+  synthetic_num_normal: 10000
+  synthetic_num_attack: 3000
+  # Preprocessing
+  test_size: 0.2
+  val_size: 0.1
+  random_seed: 42
+
+# --- Model Settings ---
+model:
+  # Type: "elman" or "gru"
+  type: "elman"
+  input_size: null  # auto-detected from data
+  hidden_size: 64
+  num_layers: 1
+  dropout: 0.1
+  sequence_length: 20
+
+# --- Training Settings ---
+training:
+  epochs: 30
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 1e-5
+  early_stopping_patience: 5
+  # Device: "auto", "cpu", "cuda", "mps"
+  device: "auto"
+
+# --- Federated Learning Settings ---
+federated:
+  num_clients: 3
+  num_rounds: 10
+  fraction_fit: 1.0    # fraction of clients used for training per round
+  fraction_evaluate: 1.0
+  min_fit_clients: 3
+  min_evaluate_clients: 3
+  local_epochs: 3       # epochs per client per round
+
+# --- Differential Privacy Settings ---
+privacy:
+  enabled: true
+  noise_multiplier: 1.0
+  max_grad_norm: 1.0
+  target_epsilon: 10.0
+  target_delta: 1e-5
+
+# --- Adversarial Robustness Settings ---
+adversarial:
+  # FGSM settings
+  fgsm_epsilon: 0.1
+  # PGD settings
+  pgd_epsilon: 0.1
+  pgd_step_size: 0.01
+  pgd_max_iter: 40
+  # Number of test samples to attack
+  num_attack_samples: 500
+
+# --- XAI Settings ---
+xai:
+  # SHAP settings
+  num_background_samples: 100
+  num_explain_samples: 50
+  top_k_features: 5
+
+# --- Fidelity Settings ---
+fidelity:
+  top_k: 5
+  mask_value: "mean"  # "mean", "zero", or "random"
+  significance_threshold: 0.1  # prediction change threshold
+
+# --- API Settings ---
+api:
+  host: "0.0.0.0"
+  port: 8000
+  debug: true
+
+# --- Database Settings ---
+database:
+  mongodb_uri: "PLACEHOLDER" # Loaded from .env file
+  db_name: "ctmas-project"
+
+# --- Dashboard Settings ---
+dashboard:
+  port: 8501
+
+# --- Logging ---
+logging:
+  level: "INFO"
+  log_file: "experiments/logs/experiment.log"

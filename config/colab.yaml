@@ -1,0 +1,37 @@
+# ============================================================
+# Google Colab (GPU) Configuration
+# ============================================================
+# Full-scale training config for Colab with GPU.
+# Usage: python experiments/runner.py --config config/colab.yaml
+# ============================================================
+
+data:
+  source: "kaggle"
+  synthetic_num_normal: 50000
+  synthetic_num_attack: 15000
+
+model:
+  hidden_size: 128
+  sequence_length: 30
+  num_layers: 2
+
+training:
+  epochs: 50
+  batch_size: 128
+  learning_rate: 0.001
+  device: "auto"
+
+federated:
+  num_rounds: 20
+  local_epochs: 5
+
+privacy:
+  noise_multiplier: 1.2
+  target_epsilon: 8.0
+
+adversarial:
+  num_attack_samples: 1000
+
+xai:
+  num_background_samples: 200
+  num_explain_samples: 100

@@ -1,0 +1,64 @@
+# ============================================================
+# CPS Security Project — Git Ignore Patterns
+# ============================================================
+
+# --- System & IDE Caches ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# --- Virtual Environments ---
+venv/
+.venv/
+env/
+ENV/
+bin/
+lib/
+share/
+include/
+
+# --- Python Caches & Compiled Bytes ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# --- Environment Configurations ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Model Artifacts & Developer Run Outputs ---
+# Exclude developer-specific runs and models to keep the repo clean
+experiments/results/my_first_run_config.yaml
+experiments/results/my_first_run_model.pt
+experiments/results/my_first_run_scaler.pkl
+experiments/results/smoke_test_model.pt
+experiments/results/dashboard_run_model.pt
+
+# Do NOT ignore pre-trained models / verification config required for local verification 
+# unless they are exceedingly large. In this project, we keep colab_trained_model.pt 
+# and colab_scaler.pkl and experiment_results.json for demo fallback and validation.
+# However, if you decide to completely externalize weights, uncomment the following line:
+# experiments/results/colab_trained_model.pt
+
+# --- Jupyter Notebooks & Data Outputs ---
+data/raw/
+data/processed/
+.kaggle/
+kaggle.json
+training_curves.png
+shap_plot.png

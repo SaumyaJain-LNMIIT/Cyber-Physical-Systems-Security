@@ -1,0 +1,39 @@
+adversarial:
+  fgsm_epsilon: 0.1
+  num_attack_samples: 1000
+  pgd_epsilon: 0.1
+  pgd_max_iter: 40
+  pgd_step_size: 0.01
+data:
+  kaggle_dataset: vishala28/swat-dataset-secure-water-treatment-system
+  random_seed: 42
+  source: kaggle
+  test_size: 0.2
+  val_size: 0.1
+federated:
+  local_epochs: 5
+  num_clients: 3
+  num_rounds: 20
+fidelity:
+  mask_value: mean
+  significance_threshold: 0.1
+  top_k: 5
+model:
+  dropout: 0.1
+  hidden_size: 128
+  num_layers: 2
+  sequence_length: 30
+  type: elman
+privacy:
+  enabled: true
+  max_grad_norm: 1.0
+  noise_multiplier: 1.0
+training:
+  batch_size: 128
+  device: auto
+  epochs: 50
+  learning_rate: 0.001
+xai:
+  num_background_samples: 200
+  num_explain_samples: 100
+  top_k_features: 5

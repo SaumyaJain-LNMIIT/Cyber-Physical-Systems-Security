@@ -1,0 +1,34 @@
+# ============================================================
+# Local (CPU) Configuration — MacBook Friendly
+# ============================================================
+# Overrides default.yaml with smaller values for fast iteration.
+# Usage: python experiments/runner.py --config config/local.yaml
+# ============================================================
+
+data:
+  source: "synthetic"
+  synthetic_num_normal: 3000
+  synthetic_num_attack: 1000
+
+model:
+  hidden_size: 32
+  sequence_length: 10
+
+training:
+  epochs: 5
+  batch_size: 32
+  device: "cpu"
+
+federated:
+  num_rounds: 15
+  local_epochs: 5
+
+privacy:
+  noise_multiplier: 0.8
+
+adversarial:
+  num_attack_samples: 100
+
+xai:
+  num_background_samples: 30
+  num_explain_samples: 10
