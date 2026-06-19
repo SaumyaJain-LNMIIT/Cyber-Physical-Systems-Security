@@ -30,7 +30,10 @@ A successful cyber-physical attack can cause physical damage, environmental haza
 
 ---
 
-## 🔐 Cryptographic Architecture & Secure Communication
+## 🔐 Cryptographic Architecture & Secure Communication (System Design Specification)
+
+> [!NOTE]
+> **Codebase Scope vs. System Design**: The cryptographic protocols detailed below represent the **conceptual threat-modeling and security design specification** for securing PLC edge-node telemetry in a production deployment. The **active codebase** in this repository implements the backend FastAPI inference services, the frontend monitoring Streamlit dashboard, and the core Machine Learning pipelines (Federated Learning client simulation, Differential Privacy noise injection, SHAP explanation verification, and Adversarial Sandbox robustness testing).
 
 In a real-world industrial control environment, federated training nodes (e.g., edge gateways or PLCs) must securely register, authenticate, and communicate with the central Federated SCADA server. Below is the specification of our secure communication model, combining public-key cryptography, zero-knowledge proofs, and authenticated symmetric encryption.
 
@@ -337,22 +340,22 @@ The model was trained on a T4 GPU using Google Colab. Below are the results logg
                   ┌──────────────────────────────────────────────┐
                   │                 Model Metrics                │
                   ├──────────────────────┬───────────────────────┤
-                  │       Accuracy       │         91.3%         │
+                  │       Accuracy       │         92.8%         │
                   ├──────────────────────┼───────────────────────┤
-                  │      Precision       │         89.7%         │
+                  │      Precision       │         89.2%         │
                   ├──────────────────────┼───────────────────────┤
-                  │        Recall        │         88.5%         │
+                  │        Recall        │         95.0%         │
                   ├──────────────────────┼───────────────────────┤
-                  │       F1 Score       │         89.1%         │
+                  │       F1 Score       │         92.0%         │
                   └──────────────────────┴───────────────────────┘
 ```
 
 * **Differential Privacy Parameters**: Trained with $\epsilon = 3.52$ and $\delta = 10^{-5}$, providing strong privacy bounds against data leakage.
-* **Adversarial Robustness**:
-  - **Clean Accuracy**: $91.3\%$
-  - **FGSM Attack (with $\epsilon = 0.1$)**: Adversarial accuracy remained high at $87.2\%$ (low attack success rate of $12.8\%$), demonstrating high resilience.
-  - **PGD Attack (with $\epsilon = 0.1$)**: Adversarial accuracy was measured at $85.6\%$ (attack success rate of $14.4\%$).
-* **SHAP Fidelity Score**: $0.245$, with a faithfulness ratio of $88.0\%$, validating that the SHAP importance rankings accurately reflect the neural network's detection logic.
+* **Adversarial Robustness Sandbox**:
+  - **Clean Accuracy**: $92.8\%$
+  - **FGSM Attack (with $\epsilon = 0.1$)**: Adversarial accuracy remained at $65.8\%$ (attack success rate of $34.2\%$).
+  - **PGD Attack (with $\epsilon = 0.1$)**: Adversarial accuracy was measured at $45.2\%$ (attack success rate of $54.8\%$).
+* **SHAP Fidelity Score**: $0.484$, with a faithfulness ratio of $89.5\%$, validating that the SHAP importance rankings accurately reflect the neural network's detection logic.
 
 ---
 
